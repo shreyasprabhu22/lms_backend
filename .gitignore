@@ -1,1 +1,13 @@
+# Ignore OS-specific files
+.DS_Store         # macOS
+Thumbs.db         # Windows
+
+# Ignore node_modules
 node_modules/
+
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+
+# Ignore log files
+*.log
