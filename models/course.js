@@ -1,5 +1,5 @@
+// course.js
 const mongoose = require('mongoose');
-const Instructor = require('./instructor');
 
 const courseSchema = new mongoose.Schema({
   id: { type: Number, required: true },
@@ -7,7 +7,20 @@ const courseSchema = new mongoose.Schema({
   category: { type: String, required: true },
   duration: { type: String, required: true },
   description: { type: String, required: true },
-  instructor: Instructor,  
+  instructor: {
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    bio: { type: String, required: true },
+    reviewIns: { type: Number, required: true },
+    image: { type: String, required: true },
+    specialization: { type: String, required: true },
+    totalCoursesTaught: { type: Number, required: true },
+    socialLinks: {
+      linkedin: { type: String },
+      twitter: { type: String }
+    },
+    location: { type: String, required: true }
+  },
   img: { type: String, required: true },
   courseContent: [
     {
