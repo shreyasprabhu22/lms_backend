@@ -2,24 +2,26 @@
 const mongoose = require('mongoose');
 
 const courseSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
+  course_id: { type: String, required: true },
   name: { type: String, required: true },
   category: { type: String, required: true },
-  duration: { type: String, required: true },
+  duration: { type: Number , required: true },
   description: { type: String, required: true },
   instructor: {
+    instructorId:{type:String},
     name: { type: String, required: true },
     email: { type: String, required: true },
     bio: { type: String, required: true },
     reviewIns: { type: Number, required: true },
     image: { type: String, required: true },
     specialization: { type: String, required: true },
-    totalCoursesTaught: { type: Number, required: true },
     socialLinks: {
       linkedin: { type: String },
       twitter: { type: String }
     },
-    location: { type: String, required: true }
+    location: { type: String, required: true },
+    username: {type:String},
+     password: {String}
   },
   img: { type: String, required: true },
   courseContent: [
@@ -38,10 +40,7 @@ const courseSchema = new mongoose.Schema({
     }
   ],
   level: { type: String, required: true },
-  language: { type: String, required: true },
-  startDate: { type: Date, required: true },
   price: { type: Number, required: true },
-  maxEnrollment: { type: Number, required: true },
   faq: [
     {
       question: { type: String, required: true },

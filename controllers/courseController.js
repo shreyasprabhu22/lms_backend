@@ -27,7 +27,7 @@ const defaultReviews = [
     comment: "Unfortunately, I didn't find the course as engaging as I had hoped. The videos were too long and the explanations could have been clearer."
   }
 ];
-
+ 
 
 const defaultFaq = [
   {
@@ -57,7 +57,7 @@ const defaultFaq = [
 const createCourse = async (req, res) => {
   const {
     name, category, duration, description, instructor, img, courseContent,
-    prerequisites, level, language, startDate, price, maxEnrollment, reviews, faq
+    prerequisites, level, price, reviews, faq
   } = req.body;
 
   try {
@@ -69,7 +69,7 @@ const createCourse = async (req, res) => {
 
     // Set default reviews and FAQs if not provided in the request
     const course = new Course({
-      id: nextCourseId,  // Set the incremented course id
+      course_id: nextCourseId,  // Set the incremented course id
       name,
       category,
       duration,
@@ -81,10 +81,8 @@ const createCourse = async (req, res) => {
       reviews: reviews || defaultReviews,  // Use default reviews if not provided
       faq: faq || defaultFaq,              // Use default FAQ if not provided
       level,
-      language,
-      startDate,
+     
       price,
-      maxEnrollment
     });
 
     // Save the course

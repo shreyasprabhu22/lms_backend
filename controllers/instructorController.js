@@ -2,29 +2,46 @@ const Instructor = require('../models/instructor');
 
 // Create a new instructor
 const createInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, specialization, totalCoursesTaught, availableForHire, socialLinks, location } = req.body;
+  const { name, email, bio, reviewIns, image, specialization, socialLinks, location ,username,password} = req.body;
 
   try {
-    const instructor = new Instructor({ 
-      name, 
-      email, 
-      bio, 
-      reviewIns, 
-      image, 
-      specialization, 
-      totalCoursesTaught, 
-      availableForHire, 
-      socialLinks, 
-      location 
+    // Find the instructor with the highest instructorId (sort in descending order by instructorId)
+    const maxInstructor = await Instructor.findOne().sort({ instructorId: -1 });
+
+    // Calculate the next instructorId
+    let nextInstructorId = 'i01';  // Default id if no instructors exist
+
+    if (maxInstructor) {
+      const lastInstructorId = maxInstructor.instructorId;
+      const numericId = parseInt(lastInstructorId.substring(2));  // Extract the numeric part of the last instructorId
+      nextInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;  // Increment the numeric part and pad to 2 digits
+    }
+
+    // Create a new instructor
+    const instructor = new Instructor({
+      instructorId: nextInstructorId,
+      name,
+      email,
+      bio,
+      reviewIns,
+      image,
+      specialization,
+      socialLinks,
+      location,
+      username,
+      password
     });
+
+    // Save the instructor to the database
     await instructor.save();
+
+    // Return the newly created instructor as a response
     res.status(201).json(instructor);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
-
 // Get all instructors
 const getInstructors = async (req, res) => {
   try {
@@ -35,6 +52,75 @@ const getInstructors = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+
+// Create multiple instructors
+const createInstructors = async (req, res) => {
+  const instructorsData = req.body;  // Array of instructors data
+
+  try {
+    // Validate the array format
+    if (!Array.isArray(instructorsData)) {
+      return res.status(400).json({ msg: 'Data must be an array of instructors' });
+    }
+
+    const createdInstructors = [];  // Array to hold created instructors
+
+    // Check if there are any existing instructors
+    const existingInstructors = await Instructor.find().sort({ instructorId: -1 });  // Sort by instructorId in descending order
+
+    let newInstructorId = 'i01';  // Default to 'i01' if no instructors exist
+
+    if (existingInstructors.length > 0) {
+      const lastInstructor = existingInstructors[0];
+      const lastInstructorId = lastInstructor.instructorId;
+      const numericId = parseInt(lastInstructorId.substring(1));  // Extract the numeric part of the last instructorId
+      newInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;  // Increment and pad to 2 digits
+    }
+
+    // Iterate over the array of instructor data
+    for (let i = 0; i < instructorsData.length; i++) {
+      const { name, email, bio, reviewIns, image, specialization, socialLinks, location, username, password } = instructorsData[i];
+
+      // Create a new instructor object
+      const instructor = new Instructor({
+        instructorId: newInstructorId,
+        name,
+        email,
+        bio,
+        reviewIns,
+        image,
+        specialization,
+        socialLinks,
+        location,
+        username,
+        password
+      });
+
+      // Save the new instructor to the database
+      await instructor.save();
+
+      // Add the created instructor to the result array
+      createdInstructors.push(instructor);
+
+      // Update the ID for the next instructor
+      const lastCreatedInstructor = createdInstructors[createdInstructors.length - 1];
+      const lastCreatedId = lastCreatedInstructor.instructorId;
+      const lastCreatedNum = parseInt(lastCreatedId.substring(1));  // Get the numeric part of the last created ID
+      const nextNum = lastCreatedNum + 1;  // Increment the ID number
+      newInstructorId = `i${nextNum.toString().padStart(2, '0')}`;  // Generate next instructor ID
+    }
+
+    // Return the array of newly created instructors
+    res.status(201).json(createdInstructors);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
 
 // Get an instructor by ID
 const getInstructorById = async (req, res) => {
@@ -78,10 +164,15 @@ const updateInstructor = async (req, res) => {
 // Delete an instructor profile
 const deleteInstructor = async (req, res) => {
   try {
-    const instructor = await Instructor.findById(req.params.id);
-    if (!instructor) return res.status(404).json({ msg: 'Instructor not found' });
+    // Find the instructor by the instructorId (string)
+    const instructor = await Instructor.findOne({ instructorId: req.params.id });
 
-    await instructor.remove();
+    if (!instructor) {
+      return res.status(404).json({ msg: 'Instructor not found' });
+    }
+
+    // Remove the instructor from the database
+    await Instructor.deleteOne({ instructorId: req.params.id });
     res.json({ msg: 'Instructor removed' });
   } catch (err) {
     console.error(err.message);
@@ -89,4 +180,31 @@ const deleteInstructor = async (req, res) => {
   }
 };
 
-module.exports = { createInstructor, getInstructors, getInstructorById, updateInstructor, deleteInstructor };
+
+
+const loginInstructor = async (req, res) => {
+  const { username, password } = req.body;
+  console.log(req.body)
+  try {
+    
+    const user = await Instructor.findOne({ username });
+    console.log("user",user)
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+
+   
+    if (user.password !== password) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+    console.log(user.password==password)
+    
+    res.json({ msg: 'Login successful', user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+module.exports = { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor,loginInstructor };

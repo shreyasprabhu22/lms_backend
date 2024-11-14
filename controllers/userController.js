@@ -2,36 +2,68 @@ const User = require('../models/user');
 
 // Create new user
 const createUser = async (req, res) => {
-  const { name, email, username, profilePhoto, phoneNumber, role } = req.body;
-
+  console.log('hello')
+  console.log(req.body)
+  const {
+    name,
+    email,
+    username,
+    password,
+    profilePhoto,
+    phoneNumber,
+    currentInstitution,
+    gender,
+    role,
+    dateOfBirth,
+    enrollmentDate,
+    bio,
+    interests,
+    location,
+    subscription,
+    purchasedCourses
+  } = req.body;
+  console.log(req.body)
   try {
-    // Find the user with the highest userId (sort in descending order by userId)
     const maxUser = await User.findOne().sort({ userId: -1 });
+    let nextUserId = 'U01';
 
-    // If no users exist, the next userId should be 1, otherwise, increment the highest userId
-    const nextUserId = maxUser ? maxUser.userId + 1 : 1;
+    if (maxUser) {
+      const lastUserId = maxUser.userId; 
+      const numericId = parseInt(lastUserId.substring(1)); 
+      nextUserId = `u${(numericId + 1).toString().padStart(2, '0')}`; 
+    }
 
-    // Create a new user with the calculated userId
     let user = new User({
-      userId: nextUserId,  // Set the incremented userId
+      userId: nextUserId,
       name,
       email,
       username,
+      password,
       profilePhoto,
       phoneNumber,
-      role
+      currentInstitution,
+      gender,
+      role,
+      dateOfBirth,
+      enrollmentDate,
+      bio,
+      interests,
+      location,
+      subscription,
+      purchasedCourses
     });
-
-    // Save the new user to the database
+    console.log(user)
     await user.save();
-
-    // Return the newly created user as a response
     res.status(201).json(user);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
+
+
+const createUsers = async (req, res) => { const usersData = req.body; if (!Array.isArray(usersData) || usersData.length === 0) { return res.status(400).json({ msg: 'Request body should be a non-empty array of users' }); } try { let maxUser = await User.findOne().sort({ userId: -1 }); const users = []; for (const userData of usersData) { let nextUserId = 'U01'; if (maxUser) { const lastUserId = maxUser.userId; const numericId = parseInt(lastUserId.substring(1)); nextUserId = `U${(numericId + 1).toString().padStart(2, '0')}`; } const newUser = new User({ userId: nextUserId, name: userData.name, email: userData.email, username: userData.username, password: userData.password, profilePhoto: userData.profilePhoto, phoneNumber: userData.phoneNumber, currentInstitution: userData.currentInstitution, gender: userData.gender, role: userData.role, dateOfBirth: userData.dateOfBirth, enrollmentDate: userData.enrollmentDate, bio: userData.bio, interests: userData.interests, location: userData.location, subscription: userData.subscription, purchasedCourses: userData.purchasedCourses }); await newUser.save(); users.push(newUser); maxUser = newUser; } res.status(201).json(users); } catch (err) { console.error(err.message); res.status(500).send('Server Error'); } };
+
 
 
 // Get all users
@@ -45,6 +77,7 @@ const getUsers = async (req, res) => {
   }
 };
 
+
 // Get user by ID
 const getUserById = async (req, res) => {
   try {
@@ -56,6 +89,7 @@ const getUserById = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 // Update user
 const updateUser = async (req, res) => {
@@ -83,10 +117,14 @@ const updateUser = async (req, res) => {
 // Delete user
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ msg: 'User not found' });
+    // Find the instructor by the instructorId (string)
+    const user = await User.findOne({ userId: req.params.id });
 
-    await user.remove();
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    await User.deleteOne({ userId: req.params.id });
     res.json({ msg: 'User removed' });
   } catch (err) {
     console.error(err.message);
@@ -96,18 +134,18 @@ const deleteUser = async (req, res) => {
 
 // Update Courses Taken
 const updateCoursesTaken = async (req, res) => {
-  const { course } = req.body; // Single course to add/remove
+  const { course } = req.body; 
   
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    // Check if the course is already in the coursesTaken array
+    
     if (user.coursesTaken.includes(course)) {
-      // If it exists, remove it from the array (remove the course)
+     
       user.coursesTaken = user.coursesTaken.filter(c => c !== course);
     } else {
-      // If it does not exist, add it to the array (add the course)
+      
       user.coursesTaken.push(course);
     }
 
@@ -121,19 +159,19 @@ const updateCoursesTaken = async (req, res) => {
 
 // Update Subscription
 const updateSubscription = async (req, res) => {
-  const { subscription } = req.body; // New subscription level (e.g., Free, Premium)
+  const { subscription } = req.body; 
   
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ msg: 'User not found' });
 
-    // Validate the subscription level (you can add more levels if necessary)
+    
     const validSubscriptions = ['Free', 'Premium', 'Pro'];
     if (!validSubscriptions.includes(subscription)) {
       return res.status(400).json({ msg: 'Invalid subscription level' });
     }
 
-    // Update the user's subscription
+    
     user.subscription = subscription;
     await user.save();
     res.json({ msg: 'Subscription updated successfully', subscription: user.subscription });
@@ -147,24 +185,48 @@ const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Check if user exists by username
+    // Find the user by username
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // Check if password matches (assuming plain text passwords)
+    // Compare the password (consider using bcrypt for hashing passwords)
     if (user.password !== password) {
       return res.status(400).json({ msg: 'Invalid credentials' });
     }
 
-    // If both username and password match
-    res.json({ msg: 'Login successful', user: { id: user.id, username: user.username, role: user.role } });
+    // Send the full user data in the response (you can exclude sensitive fields like password if needed)
+    const userData = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+      email: user.email,
+      profilePhoto: user.profilePhoto,
+      phoneNumber: user.phoneNumber,
+      currentInstitution: user.currentInstitution,
+      gender: user.gender,
+      dateOfBirth: user.dateOfBirth,
+      enrollmentDate: user.enrollmentDate,
+      bio: user.bio,
+      interests: user.interests,
+      location: user.location,
+      subscription: user.subscription,
+      purchasedCourses: user.purchasedCourses,
+    };
+
+    // Send the response with the user data (you can add a token if using JWT)
+    res.json({
+      msg: 'Login successful',
+      user: userData,  // Send the full user object
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
+
 
 
 const getCoursesTakenByUser = async (req, res) => {
@@ -194,5 +256,6 @@ module.exports = {
   updateCoursesTaken, 
   updateSubscription ,
   loginUser,
-  getCoursesTakenByUser
+  getCoursesTakenByUser,
+  createUsers
 };

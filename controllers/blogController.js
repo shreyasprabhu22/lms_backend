@@ -1,17 +1,17 @@
-const Blog = require('../models/blog');
-
+const Blog = require("../models/blog");
 
 const createBlog = async (req, res) => {
+  const { title, content, author,authorImage, date, description, category, images } = req.body;
   try {
-    const { title, content, author, authorImage, date, description, category, images } = req.body;
-
-    // Check if all required fields are provided
-    if (!title || !content || !author || !date || !description || !category) {
-      return res.status(400).json({ msg: 'Please provide all required fields' });
+    const maxBlog = await Blog.findOne().sort({ blog_id: -1 });
+    let nextBlogId = "B01";
+    if (maxBlog) {
+      const lastBlogId = maxBlog.blog_id;
+      const numericId = parseInt(lastBlogId.substring(1));
+      nextBlogId = `B${(numericId + 1).toString().padStart(2, "0")}`;
     }
-
-    // Create a new blog instance
     const newBlog = new Blog({
+      blog_id: nextBlogId,
       title,
       content,
       author,
@@ -19,48 +19,77 @@ const createBlog = async (req, res) => {
       date,
       description,
       category,
-      images
+      images,
     });
-
-    // Save the blog to the database
     await newBlog.save();
-    
-    res.status(201).json(newBlog);  // Send the created blog as the response
+    res.status(201).json(newBlog);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
+const createBlogs = async (req, res) => {
+  const blogs = req.body;
+
+  if (!Array.isArray(blogs) || blogs.length === 0) {
+    return res.status(400).json({ msg: "Invalid input. Please provide an array of blogs." });
+  }
+
+  try {
+    const maxBlog = await Blog.findOne().sort({ blog_id: -1 });
+    let nextBlogIdNumber = maxBlog ? parseInt(maxBlog.blog_id.substring(1)) + 1 : 1;
+
+    const blogsWithIds = blogs.map((blog) => {
+      const { title, content, author,authorImage, date, description, category, images } = blog;
+
+      const nextBlogId = `B${nextBlogIdNumber.toString().padStart(2, "0")}`;
+      nextBlogIdNumber++; // Increment for the next blog
+
+      return new Blog({
+        blog_id: nextBlogId,
+        title,
+        content,
+        author,
+        authorImage,
+        date,
+        description,
+        category,
+        images,
+      });
+    });
+
+    const savedBlogs = await Blog.insertMany(blogsWithIds);
+    res.status(201).json(savedBlogs);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
 
 const getBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ date: -1 });  // Sort by date descending (latest blogs first)
-    
+    const blogs = await Blog.find().sort({ date: -1 });
     if (blogs.length === 0) {
-      return res.status(404).json({ msg: 'No blogs found' });
+      return res.status(404).json({ msg: "No blogs found" });
     }
-
     res.json(blogs);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
-
 
 const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
-
     if (!blog) {
-      return res.status(404).json({ msg: 'Blog not found' });
+      return res.status(404).json({ msg: "Blog not found" });
     }
-
     res.json(blog);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -69,12 +98,10 @@ const updateBlog = async (req, res) => {
     const { title, content, author, authorImage, date, description, category, images } = req.body;
 
     const blog = await Blog.findById(req.params.id);
-
     if (!blog) {
-      return res.status(404).json({ msg: 'Blog not found' });
+      return res.status(404).json({ msg: "Blog not found" });
     }
 
-    // Update the blog with the new data
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.author = author || blog.author;
@@ -84,60 +111,53 @@ const updateBlog = async (req, res) => {
     blog.category = category || blog.category;
     blog.images = images || blog.images;
 
-    // Save the updated blog to the database
     await blog.save();
 
     res.json(blog);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
-
 const deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id);
+    // Find the instructor by the instructorId (string)
+    const blog = await Blog.findOne({ blog_id: req.params.id });
 
     if (!blog) {
       return res.status(404).json({ msg: 'Blog not found' });
     }
 
-    // Delete the blog
-    await blog.remove();
-
-    res.json({ msg: 'Blog deleted' });
+    await Blog.deleteOne({ blog_id: req.params.id });
+    res.json({ msg: 'Blog removed' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
 
-
-// Get upcoming blogs within the next 7 days, sorted by date
 const getUpcomingBlogs = async (req, res) => {
   try {
-    // Get the current date and the date 7 days from now
     const currentDate = new Date();
     const nextWeekDate = new Date();
-    nextWeekDate.setDate(currentDate.getDate() + 7);  // Get the date 7 days from now
+    nextWeekDate.setDate(currentDate.getDate() + 7);
 
-    // Query blogs that have a publish date within the next 7 days
     const upcomingBlogs = await Blog.find({
-      date: { 
-        $gte: currentDate,     // Start from the current date
-        $lt: nextWeekDate      // Up to the date 7 days later
-      }
-    }).sort({ date: 1 });  // Sort by date in ascending order (earliest first)
+      date: {
+        $gte: currentDate,
+        $lt: nextWeekDate,
+      },
+    }).sort({ date: 1 });
 
     if (upcomingBlogs.length === 0) {
-      return res.status(404).json({ msg: 'No upcoming blogs found in the next 7 days' });
+      return res.status(404).json({ msg: "No upcoming blogs found in the next 7 days" });
     }
 
     res.json(upcomingBlogs);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
 
@@ -147,5 +167,6 @@ module.exports = {
   getBlogById,
   updateBlog,
   deleteBlog,
-  getUpcomingBlogs,  // Export the new function
+  getUpcomingBlogs,
+  createBlogs,
 };

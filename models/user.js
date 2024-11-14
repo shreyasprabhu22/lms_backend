@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
-  userId:{type:Number,required:true},
+  userId:{type:String,required:true},
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
   phoneNumber: { type: String },
   currentInstitution: { type: String },
   gender: { type: String },
-  role: { type: String, enum: ['Admin', 'Student', 'Instructor'], default: 'Student' },
+  role: { type: String, enum: ['Admin', 'User'], default: 'User' },
   dateOfBirth: { type: Date },
   enrollmentDate: { type: Date },
   bio: { type: String },

@@ -6,7 +6,8 @@ const {
   getBlogById, 
   updateBlog, 
   deleteBlog, 
-  getUpcomingBlogs  // Add the route for upcoming blogs
+  getUpcomingBlogs  ,
+  createBlogs
 } = require('../controllers/blogController');
 
 // Blog routes
@@ -15,8 +16,7 @@ router.get('/', getBlogs);
 router.get('/:id', getBlogById);
 router.put('/:id', updateBlog);
 router.delete('/:id', deleteBlog);
-
-// New route for fetching upcoming blogs
-router.get('/upcoming', getUpcomingBlogs);  // This will list blogs in the near future
+router.post('/all', createBlogs);
+router.get('/upcoming', getUpcomingBlogs);  
 
 module.exports = router;

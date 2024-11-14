@@ -8,11 +8,14 @@ const {
   deleteUser, 
   updateCoursesTaken, 
   updateSubscription ,
-  getCoursesTakenByUser
+  getCoursesTakenByUser,
+  loginUser,
+  createUsers
 } = require('../controllers/userController');
 
 // Create a new user
 router.post('/', createUser);
+router.post('/all', createUsers);
 
 // Get all users
 router.get('/', getUsers);
@@ -33,5 +36,7 @@ router.put('/:id/courses', updateCoursesTaken);
 router.put('/:id/subscription', updateSubscription);
 
 router.get('/:id/courses', getCoursesTakenByUser);
+
+router.post('/login', loginUser);
 
 module.exports = router;
