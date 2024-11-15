@@ -2,7 +2,7 @@ const Instructor = require('../models/instructor');
 
 // Create a new instructor
 const createInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, specialization, socialLinks, location ,username,password} = req.body;
+  const { name, email, bio, reviewIns, image, specialization, socialLinks, location ,username,password,role} = req.body;
 
   try {
     // Find the instructor with the highest instructorId (sort in descending order by instructorId)
@@ -29,7 +29,8 @@ const createInstructor = async (req, res) => {
       socialLinks,
       location,
       username,
-      password
+      password,
+      role
     });
 
     // Save the instructor to the database
@@ -80,7 +81,7 @@ const createInstructors = async (req, res) => {
 
     // Iterate over the array of instructor data
     for (let i = 0; i < instructorsData.length; i++) {
-      const { name, email, bio, reviewIns, image, specialization, socialLinks, location, username, password } = instructorsData[i];
+      const { name, email, bio, reviewIns, image, specialization, socialLinks, location, username, password,role } = instructorsData[i];
 
       // Create a new instructor object
       const instructor = new Instructor({
@@ -94,7 +95,8 @@ const createInstructors = async (req, res) => {
         socialLinks,
         location,
         username,
-        password
+        password,
+        role
       });
 
       // Save the new instructor to the database
@@ -136,7 +138,7 @@ const getInstructorById = async (req, res) => {
 
 // Update an instructor profile
 const updateInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, specialization, totalCoursesTaught, availableForHire, socialLinks, location } = req.body;
+  const { name, email, bio, reviewIns, image, specialization, totalCoursesTaught, availableForHire, socialLinks, location , role} = req.body;
 
   try {
     const instructor = await Instructor.findById(req.params.id);
@@ -152,6 +154,7 @@ const updateInstructor = async (req, res) => {
     instructor.availableForHire = availableForHire || instructor.availableForHire;
     instructor.socialLinks = socialLinks || instructor.socialLinks;
     instructor.location = location || instructor.location;
+    instructor.role = role || instructor.role;
 
     await instructor.save();
     res.json(instructor);

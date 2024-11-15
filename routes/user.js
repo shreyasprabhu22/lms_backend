@@ -6,8 +6,6 @@ const {
   getUserById, 
   updateUser, 
   deleteUser, 
-  updateCoursesTaken, 
-  updateSubscription ,
   getCoursesTakenByUser,
   loginUser,
   createUsers
@@ -29,13 +27,9 @@ router.put('/:id', updateUser);
 // Delete a user
 router.delete('/:id', deleteUser);
 
-// Update courses taken (add/remove courses)
-router.put('/:id/courses', updateCoursesTaken);
+// Get courses taken by user
+router.get('/coursesTaken/:id', getCoursesTakenByUser);
 
-// Update user subscription
-router.put('/:id/subscription', updateSubscription);
-
-router.get('/:id/courses', getCoursesTakenByUser);
 
 router.post('/login', loginUser);
 

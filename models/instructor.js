@@ -6,6 +6,7 @@ const instructorSchema = new mongoose.Schema({
   name: String,
   email: String,
   bio: String, 
+  role:String,
   reviewIns: Number,
   image: String,
   specialization: String,
