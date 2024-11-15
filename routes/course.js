@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createCourse, addCourses, getCourses, getCourseById, updateCourse, deleteCourse , getCoursesByInstructor} = require('../controllers/courseController');
+const { createCourse, addCourses, getCourses, getCourseById, getCoursesByCategory,updateCourse, deleteCourse , getCoursesByInstructor} = require('../controllers/courseController');
 
 router.post('/', createCourse);  // Create course
 router.post('/all',addCourses);
@@ -9,4 +9,5 @@ router.get('/:id', getCourseById);  // Get course by ID
 router.put('/:id', updateCourse);  // Update course
 router.delete('/:id', deleteCourse);  // Delete course
 router.get('/instructor/:instructor_id', getCoursesByInstructor);
+router.get('/category/:category', getCoursesByCategory);
 module.exports = router;

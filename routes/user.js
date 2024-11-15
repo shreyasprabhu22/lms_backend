@@ -8,7 +8,7 @@ const {
   deleteUser, 
   getCoursesTakenByUser,
   loginUser,
-  createUsers
+  createUsers,
 } = require('../controllers/userController');
 
 // Create a new user

@@ -53,6 +53,7 @@ const addCourseToCart = async (req, res) => {
 
 
 // Remove a course from the user's cart
+// Remove a course from the user's cart
 const removeCourseFromCart = async (req, res) => {
   const { userId } = req.params; // Extract userId from URL params
   const { courseId } = req.body; // Extract courseId from request body
@@ -105,9 +106,32 @@ const getCartWithCourses = async (req, res) => {
   }
 };
 
+const clearCart = async (req, res) => {
+  const { userId } = req.params; // Extract userId from URL params
+
+  try {
+    // Find the cart for the user and remove all courses
+    let cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+      return res.status(404).json({ msg: 'Cart not found' });
+    }
+
+    // Clear all courses from the cart
+    cart.courses = [];
+    await cart.save();
+
+    res.json({ msg: 'Cart cleared successfully', cart });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   getCart,
   addCourseToCart,
   removeCourseFromCart,
-  getCartWithCourses
+  getCartWithCourses,
+  clearCart
 };

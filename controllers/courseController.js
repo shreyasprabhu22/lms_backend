@@ -126,6 +126,28 @@ exports.addCourses = async (req, res) => {
   }
 };
 
+// Get courses by category
+exports.getCoursesByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;  // Extract the category from the URL parameter
+    console.log(category)
+    // Query the Course collection to find courses matching the given category
+    const courses = await Course.find({ category: category });
+
+    // If no courses were found
+    if (courses.length === 0) {
+      return res.status(404).json({ message: `No courses found in the ${category} category` });
+    }
+    console.log(courses)
+    // Return the list of courses
+    res.status(200).json(courses);
+  } catch (err) {
+    console.error('Error fetching courses by category:', err);
+    res.status(500).json({ message: 'Error fetching courses by category', error: err.message });
+  }
+};
+
+
     
   
 

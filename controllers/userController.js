@@ -138,28 +138,40 @@ const Course = require("../models/course"); // Assuming your Course model is in 
 // Update course by course_id
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params; // Extract course_id from the request parameters
-    const updateFields = req.body; // Extract fields to update from the body
+    const { id } = req.params; // Extract userId from the request parameters
+    const { coursesPurchased, subscription } = req.body; // Extract the coursesPurchased and subscription from the body
 
-    // Find the course by its course_id and update with the provided fields
-    const updatedUser = await User.findOneAndUpdate(
-      { userId: id }, // Query to find the course by course_id
-      updateFields, // Fields to update
-      { new: true } // Return the updated course instead of the old one
-    );
+    // Log the update fields for debugging purposes
+    console.log('Courses to add:', coursesPurchased);
 
-    // If no course was found
-    if (!updatedUser) {
-      return res.status(404).json({ msg: "Course not found" });
+    // Ensure that coursesPurchased is an array
+    if (!Array.isArray(coursesPurchased) || coursesPurchased.length === 0) {
+      return res.status(400).json({ msg: 'Invalid courses to add' });
     }
 
-    // Return the updated course
+    // Use $addToSet to add courses to the purchasedCourses array (avoids duplicates)
+    const updatedUser = await User.findOneAndUpdate(
+      { userId: id }, // Query to find the user by userId
+      {
+        $addToSet: { purchasedCourses: { $each: coursesPurchased } }, // Append courses to purchasedCourses array
+        $set: { subscription } // Update the subscription field
+      },
+      { new: true, runValidators: true } // Return updated user and run validation
+    );
+
+    // If no user was found
+    if (!updatedUser) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Return the updated user
     res.status(200).json(updatedUser);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error('Error updating user:', err.message);
+    res.status(500).send('Server Error');
   }
 };
+
 
 // Delete user
 const deleteUser = async (req, res) => {

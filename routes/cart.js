@@ -4,7 +4,8 @@ const {
   getCart,
   addCourseToCart,
   removeCourseFromCart,
-  getCartWithCourses
+  getCartWithCourses,
+  clearCart
 } = require('../controllers/cartController');
 
 // Get the user's cart
@@ -18,4 +19,5 @@ router.post('/:userId', addCourseToCart);
 // Remove a course from the cart
 router.delete('/:userId/remove', removeCourseFromCart);
 
+router.delete('/:userId/clear', clearCart);
 module.exports = router;
