@@ -125,7 +125,7 @@ const createInstructors = async (req, res) => {
 // Get an instructor by ID
 const getInstructorById = async (req, res) => {
   try {
-    const instructor = await Instructor.findById(req.params.id);
+    const instructor = await Instructor.findOne({ instructorId:req.params.id });
     if (!instructor) return res.status(404).json({ msg: 'Instructor not found' });
     res.json(instructor);
   } catch (err) {

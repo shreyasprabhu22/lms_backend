@@ -1,5 +1,4 @@
 const Course = require('../models/course');
-
 const defaultReviews = [
   {
     reviewer: "Alice Johnson",
@@ -52,109 +51,160 @@ const defaultFaq = [
   }
 ];
 
-
-// Create new course
-const createCourse = async (req, res) => {
-  const {
-    name, category, duration, description, instructor, img, courseContent,
-    prerequisites, level, price, reviews, faq
-  } = req.body;
-
+// Create a new course
+exports.createCourse = async (req, res) => {
   try {
-    // Find the course with the highest id (sort in descending order by id)
-    const maxCourse = await Course.findOne().sort({ id: -1 });
+    // Check if this is the first course or if we need to generate the course_id
+    const courseCount = await Course.countDocuments();
+    let newCourseId = '';
 
-    // Calculate the next course id
-    const nextCourseId = maxCourse ? maxCourse.id + 1 : 1;
+    if (courseCount === 0) {
+      newCourseId = 'C01'; // First course
+    } else {
+      const lastCourse = await Course.findOne().sort({ course_id: -1 }); // Get the last created course by ID
+      const lastId = parseInt(lastCourse.course_id.slice(1)); // Extract the numeric part
+      const nextId = lastId + 1;
+      newCourseId = `c${nextId.toString().padStart(2, '0')}`; // Generate the next ID (c01, c02, etc.)
+    }
 
-    // Set default reviews and FAQs if not provided in the request
-    const course = new Course({
-      course_id: nextCourseId,  // Set the incremented course id
-      name,
-      category,
-      duration,
-      description,
-      instructor,
-      img,
-      courseContent,
-      prerequisites,
-      reviews: reviews || defaultReviews,  // Use default reviews if not provided
-      faq: faq || defaultFaq,              // Use default FAQ if not provided
-      level,
-     
-      price,
-    });
+    // Prepare course data
+    const courseData = {
+      ...req.body,
+      course_id: newCourseId,
+      faq:defaultFaq,
+      reviews:defaultReviews 
+    };
 
-    // Save the course
+    const course = new Course(courseData);
     await course.save();
-
-    // Return the newly created course as a response
-    res.status(201).json(course);
+    res.status(201).json({ message: 'Course created successfully', course });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Error creating course:', err);
+    res.status(500).json({ message: 'Error creating course', error: err.message });
   }
 };
+
+exports.addCourses = async (req, res) => {
+  try {
+    // Destructure courses array from the request body
+    const courses = req.body;
+
+    // Validate that the request body is an array and not empty
+    if (!Array.isArray(courses) || courses.length === 0) {
+      return res.status(400).json({ message: 'Please provide an array of courses.' });
+    }
+
+    // Get the current count of courses to generate the next unique ID
+    const courseCount = await Course.countDocuments();
+    let nextCourseId = courseCount + 1; // Start from the next ID after the existing courses count
+
+    // Loop through each course and assign a unique course_id
+    for (let i = 0; i < courses.length; i++) {
+      // Format course_id to include the leading zeroes
+      const courseId = `C${nextCourseId.toString().padStart(2, '0')}`;
+      
+      // Set the course_id, faq, and reviews for each course
+      courses[i].course_id = courseId;
+      courses[i].faq = defaultFaq;
+      courses[i].reviews = defaultReviews;
+
+      // Increment the course ID for the next course
+      nextCourseId++;
+    }
+
+    // Insert all courses into the database at once
+    const createdCourses = await Course.insertMany(courses);
+
+    // Send back a success response
+    res.status(201).json({
+      message: 'Courses added successfully!',
+      courses: createdCourses,
+    });
+  } catch (err) {
+    console.error('Error adding courses:', err);
+    res.status(500).json({ message: 'Error adding courses', error: err.message });
+  }
+};
+
+    
+  
 
 
 // Get all courses
-const getCourses = async (req, res) => {
+exports.getCourses = async (req, res) => {
   try {
     const courses = await Course.find();
-    res.json(courses);
+    res.status(200).json(courses);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Error fetching courses:', err);
+    res.status(500).json({ message: 'Error fetching courses', error: err.message });
   }
 };
 
-// Get course by ID
-const getCourseById = async (req, res) => {
+// Get a course by ID
+exports.getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ msg: 'Course not found' });
-    res.json(course);
+    console.log(req.params.course_id)
+    const course = await Course.findOne({ course_id:req.params.id });
+    console.log(course)
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    res.status(200).json(course);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Error fetching course:', err);
+    res.status(500).json({ message: 'Error fetching course', error: err.message });
   }
 };
 
-// Update course
-const updateCourse = async (req, res) => {
-  const { title, content, author, description, category, images } = req.body;
-
+// Update a course by ID
+exports.updateCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ msg: 'Course not found' });
-
-    course.title = title || course.title;
-    course.content = content || course.content;
-    course.author = author || course.author;
-    course.description = description || course.description;
-    course.category = category || course.category;
-    course.images = images || course.images;
-
-    await course.save();
-    res.json(course);
+    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    res.status(200).json({ message: 'Course updated successfully', course });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Error updating course:', err);
+    res.status(500).json({ message: 'Error updating course', error: err.message });
   }
 };
 
-// Delete course
-const deleteCourse = async (req, res) => {
+// Delete a course by ID
+exports.deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
-    if (!course) return res.status(404).json({ msg: 'Course not found' });
-
-    await course.remove();
-    res.json({ msg: 'Course removed' });
+    console.log("inside")
+    const course = await Course.findOne({course_id:req.params.id});
+    console.log(course)
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    await Course.deleteOne({ course_id: req.params.id });
+    console.log("yes")
+    res.json({ msg: 'Courses removed' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 };
 
-module.exports = { createCourse, getCourses, getCourseById, updateCourse, deleteCourse };
+
+exports.getCoursesByInstructor = async (req, res) => {
+  try {
+    const instructorId = req.params.instructor_id; // Get the instructor ID from the URL parameter
+
+    // Find all courses that belong to the instructor
+    const courses = await Course.find({ instructor_id: instructorId });
+
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'No courses found for this instructor' });
+    }
+
+    res.status(200).json(courses);
+  } catch (err) {
+    console.error('Error fetching courses by instructor:', err);
+    res.status(500).json({ message: 'Error fetching courses by instructor', error: err.message });
+  }
+};
+
