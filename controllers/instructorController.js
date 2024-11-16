@@ -2,7 +2,7 @@ const Instructor = require('../models/instructor');
 
 // Create a new instructor
 const createInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, specialization, socialLinks, location ,username,password,role} = req.body;
+  const { name, email, bio, reviewIns, image,experience, specialization, socialLinks, location ,username,password,role} = req.body;
 
   try {
     // Find the instructor with the highest instructorId (sort in descending order by instructorId)
@@ -25,6 +25,7 @@ const createInstructor = async (req, res) => {
       bio,
       reviewIns,
       image,
+      experience,
       specialization,
       socialLinks,
       location,
@@ -81,7 +82,7 @@ const createInstructors = async (req, res) => {
 
     // Iterate over the array of instructor data
     for (let i = 0; i < instructorsData.length; i++) {
-      const { name, email, bio, reviewIns, image, specialization, socialLinks, location, username, password,role } = instructorsData[i];
+      const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password,role } = instructorsData[i];
 
       // Create a new instructor object
       const instructor = new Instructor({
@@ -91,6 +92,7 @@ const createInstructors = async (req, res) => {
         bio,
         reviewIns,
         image,
+        experience,
         specialization,
         socialLinks,
         location,
@@ -149,6 +151,7 @@ const updateInstructor = async (req, res) => {
     instructor.bio = bio || instructor.bio;
     instructor.reviewIns = reviewIns || instructor.reviewIns;
     instructor.image = image || instructor.image;
+    instructor.experience = experience || instructor.experience;
     instructor.specialization = specialization || instructor.specialization;
     instructor.totalCoursesTaught = totalCoursesTaught || instructor.totalCoursesTaught;
     instructor.availableForHire = availableForHire || instructor.availableForHire;

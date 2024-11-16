@@ -230,3 +230,38 @@ exports.getCoursesByInstructor = async (req, res) => {
   }
 };
 
+
+
+exports.getCoursesFromDifferentCategories = async (req, res) => {
+  try {
+    // Fetch distinct categories
+    const categories = await Course.distinct('category');
+
+    // If there are fewer than 4 categories, just return one course from all available categories
+    const categoriesToFetch = categories.slice(0, 4);
+
+    const courses = [];
+
+    // Fetch one course from each selected category
+    for (const category of categoriesToFetch) {
+      const course = await Course.findOne({ category }).sort({ createdAt: -1 });  // Sorting to get the latest course
+      if (course) {
+        courses.push(course);
+      }
+    }
+
+    // If we don't have four courses, handle that case
+    if (courses.length < 4) {
+      return res.status(404).json({ msg: 'Not enough courses found from different categories' });
+    }
+
+    // Return the list of courses
+    res.json(courses);
+  } catch (err) {
+    console.error('Error fetching courses:', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+

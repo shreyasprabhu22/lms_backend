@@ -139,27 +139,24 @@ const deleteBlog = async (req, res) => {
 
 const getUpcomingBlogs = async (req, res) => {
   try {
-    const currentDate = new Date();
-    const nextWeekDate = new Date();
-    nextWeekDate.setDate(currentDate.getDate() + 7);
+    const blogs = await Blog.find();
 
-    const upcomingBlogs = await Blog.find({
-      date: {
-        $gte: currentDate,
-        $lt: nextWeekDate,
-      },
-    }).sort({ date: 1 });
-
-    if (upcomingBlogs.length === 0) {
-      return res.status(404).json({ msg: "No upcoming blogs found in the next 7 days" });
+    if (blogs.length === 0) {
+      return res.status(404).json({ msg: "No blogs found" });
     }
 
-    res.json(upcomingBlogs);
+    // Convert date strings to Date objects for sorting
+    const sortedBlogs = blogs.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
+    
+    res.json(sortedBlogs);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error fetching recent blogs:', err.message);
     res.status(500).send("Server Error");
   }
 };
+
+
+
 
 module.exports = {
   createBlog,
