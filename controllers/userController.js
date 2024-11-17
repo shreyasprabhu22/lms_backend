@@ -131,12 +131,11 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Update user
-// Update user
+
 const Course = require("../models/course"); // Assuming your Course model is in course.js
 
 // Update course by course_id
-const updateUser = async (req, res) => {
+const updateCourses = async (req, res) => {
   try {
     const { id } = req.params; // Extract userId from the request parameters
     const { coursesPurchased, subscription } = req.body; // Extract the coursesPurchased and subscription from the body
@@ -172,6 +171,27 @@ const updateUser = async (req, res) => {
   }
 };
 
+const updatePassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Update the password (consider hashing the password in production)
+    user.password = password; 
+    await user.save();
+
+    res.status(200).json({ msg: 'Password updated successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
 
 // Delete user
 const deleteUser = async (req, res) => {
@@ -254,16 +274,66 @@ const getCoursesTakenByUser = async (req, res) => {
   }
 };
 
+// Find user by email and return true if user exists
+const findUserByEmail = async (req, res) => {
+  const { email } = req.body; // Get the email from the request body
+  
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email });
+    
+    // If user exists, return true, else return false
+    if (user) {
+      return res.status(200).json({ exists: true });
+    } else {
+      return res.status(200).json({ exists: false });
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
 
+const updateUser = async (req, res) => {
+  const { id } = req.params; // Extract userId from the request parameters
+  const updateData = req.body; // Extract the fields to update from the request body
 
+  try {
+    // Find the user by userId
+    const user = await User.findOne({ userId: id });
+
+    // If no user is found, send a 404 error
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    // Update the user's data with the provided fields
+    // Use set() to update only the provided fields in the request body
+    Object.keys(updateData).forEach(key => {
+      user[key] = updateData[key];
+    });
+
+    // Save the updated user
+    await user.save();
+
+    // Return the updated user
+    res.status(200).json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
 
 module.exports = {
   createUser,
   getUsers,
   getUserById,
-  updateUser,
+  updateCourses,
   deleteUser,
   loginUser,
   getCoursesTakenByUser,
   createUsers,
+  findUserByEmail,
+  updatePassword,
+  updateUser
 };

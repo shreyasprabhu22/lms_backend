@@ -137,6 +137,8 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+
+
 const getUpcomingBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find();
@@ -154,8 +156,6 @@ const getUpcomingBlogs = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
-
 
 
 module.exports = {

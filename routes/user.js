@@ -4,11 +4,14 @@ const {
   createUser, 
   getUsers, 
   getUserById, 
-  updateUser, 
+  updateCourses, 
   deleteUser, 
   getCoursesTakenByUser,
   loginUser,
   createUsers,
+  findUserByEmail,
+  updatePassword,
+  updateUser
 } = require('../controllers/userController');
 
 // Create a new user
@@ -20,9 +23,10 @@ router.get('/', getUsers);
 
 // Get a user by ID
 router.get('/:id', getUserById);
-
+router.put('/update-password', updatePassword);
 // Update a user
-router.put('/:id', updateUser);
+router.put('/:id', updateCourses);
+router.put('/update/:id', updateUser);
 
 // Delete a user
 router.delete('/:id', deleteUser);
@@ -32,5 +36,8 @@ router.get('/coursesTaken/:id', getCoursesTakenByUser);
 
 
 router.post('/login', loginUser);
+
+router.post('/check-email', findUserByEmail);
+
 
 module.exports = router;
