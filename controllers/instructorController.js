@@ -140,12 +140,28 @@ const getInstructorById = async (req, res) => {
 
 // Update an instructor profile
 const updateInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, specialization, totalCoursesTaught, availableForHire, socialLinks, location , role} = req.body;
+  console.log(req.body)
+  const {
+    name,
+    email,
+    bio,
+    reviewIns,
+    image,
+    specialization,
+    experience,
+    totalCoursesTaught,
+    availableForHire,
+    socialLinks,
+    location,
+    role,
+  } = req.body;
 
   try {
-    const instructor = await Instructor.findById(req.params.id);
+    // Find instructor by their custom instructorId (not MongoDB _id)
+    const instructor = await Instructor.findOne({ instructorId: req.params.id });
     if (!instructor) return res.status(404).json({ msg: 'Instructor not found' });
 
+    // Update instructor fields, keeping existing values if not provided
     instructor.name = name || instructor.name;
     instructor.email = email || instructor.email;
     instructor.bio = bio || instructor.bio;
@@ -159,13 +175,17 @@ const updateInstructor = async (req, res) => {
     instructor.location = location || instructor.location;
     instructor.role = role || instructor.role;
 
+    // Save updated instructor object
     await instructor.save();
+    
+    // Return the updated instructor object
     res.json(instructor);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error updating instructor:', err.message);
     res.status(500).send('Server Error');
   }
 };
+
 
 // Delete an instructor profile
 const deleteInstructor = async (req, res) => {
@@ -212,5 +232,61 @@ const loginInstructor = async (req, res) => {
   }
 };
 
+const getInstructorByEmail = async (req, res) => {
+  const { email } = req.params;  // Expecting the email to be passed as a route parameter
 
-module.exports = { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor,loginInstructor };
+  try {
+    // Find the instructor by email
+    const instructor = await Instructor.findOne({ email });
+
+    // If the instructor is not found, return 404 with exists: false
+    if (!instructor) {
+      return res.status(404).json({ exists: false });
+    }
+
+    // Return the found instructor and exists: true
+    res.json({ exists: true, instructor });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
+// Update instructor password
+const updatePassword = async (req, res) => {
+  console.log(req.body)
+  try {
+    // Find the user by email
+    email=req.body.email;
+    new_password=req.body.newPassword
+    const instructor = await Instructor.findOne({email} );
+    console.log(new_password)
+    if (!instructor) {
+      return res.status(404).json({ msg: 'Instructor not found' });
+    }
+
+    
+    instructor.password = new_password; 
+    await instructor.save();
+
+    res.status(200).json({ msg: 'Password updated successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Server Error");
+  }
+};
+
+module.exports = {
+  createInstructor,
+  createInstructors,
+  getInstructors,
+  getInstructorById,
+  updateInstructor,
+  deleteInstructor,
+  loginInstructor,
+  updatePassword  
+};
+
+module.exports = { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor,loginInstructor, getInstructorByEmail, updatePassword };

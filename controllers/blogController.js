@@ -97,11 +97,13 @@ const updateBlog = async (req, res) => {
   try {
     const { title, content, author, authorImage, date, description, category, images } = req.body;
 
-    const blog = await Blog.findById(req.params.id);
+    // Find the blog by its custom blog_id (not MongoDB _id)
+    const blog = await Blog.findOne({ blog_id: req.params.id });
     if (!blog) {
       return res.status(404).json({ msg: "Blog not found" });
     }
 
+    // Update the blog fields, using existing values if not provided
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.author = author || blog.author;
@@ -111,11 +113,13 @@ const updateBlog = async (req, res) => {
     blog.category = category || blog.category;
     blog.images = images || blog.images;
 
+    // Save the updated blog object
     await blog.save();
 
+    // Return the updated blog object
     res.json(blog);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error updating blog:', err.message);
     res.status(500).send("Server Error");
   }
 };

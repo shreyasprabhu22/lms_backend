@@ -180,18 +180,46 @@ exports.getCourseById = async (req, res) => {
 };
 
 // Update a course by ID
+// Update a course by ID
 exports.updateCourse = async (req, res) => {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Get course ID from the request parameters
+    const courseId = req.params.id;
+
+    // Ensure the course exists by searching with the `course_id`
+    const course = await Course.findOne({ course_id: courseId });
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
-    res.status(200).json({ message: 'Course updated successfully', course });
+
+    // Prepare the updated course data (you can modify the fields as needed)
+    const updatedCourseData = req.body; // Ensure the body is validated and only includes allowed fields.
+
+    // Update the course
+    const updatedCourse = await Course.findOneAndUpdate(
+      { course_id: courseId }, // Find by course_id
+      updatedCourseData,         // Update with the new data from the request body
+      { new: true }              // Option to return the updated document
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found after update' });
+    }
+
+    // Return the updated course
+    res.status(200).json({
+      message: 'Course updated successfully!',
+      course: updatedCourse,
+    });
   } catch (err) {
     console.error('Error updating course:', err);
-    res.status(500).json({ message: 'Error updating course', error: err.message });
+    res.status(500).json({
+      message: 'Error updating course',
+      error: err.message,
+    });
   }
 };
+
 
 // Delete a course by ID
 exports.deleteCourse = async (req, res) => {

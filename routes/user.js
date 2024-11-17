@@ -23,10 +23,6 @@ router.get('/', getUsers);
 
 // Get a user by ID
 router.get('/:id', getUserById);
-router.put('/update-password', updatePassword);
-// Update a user
-router.put('/:id', updateCourses);
-router.put('/update/:id', updateUser);
 
 // Delete a user
 router.delete('/:id', deleteUser);
@@ -38,6 +34,16 @@ router.get('/coursesTaken/:id', getCoursesTakenByUser);
 router.post('/login', loginUser);
 
 router.post('/check-email', findUserByEmail);
+
+
+
+//update password
+router.put('/update-password', updatePassword);
+//update courses
+router.put('/:id', updateCourses);
+//update user
+router.put('/update/:id', updateUser);
+
 
 
 module.exports = router;

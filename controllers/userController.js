@@ -132,7 +132,7 @@ const getUserById = async (req, res) => {
 };
 
 
-const Course = require("../models/course"); // Assuming your Course model is in course.js
+
 
 // Update course by course_id
 const updateCourses = async (req, res) => {
@@ -182,7 +182,7 @@ const updatePassword = async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    // Update the password (consider hashing the password in production)
+    
     user.password = password; 
     await user.save();
 
