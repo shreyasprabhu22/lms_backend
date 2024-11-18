@@ -18,6 +18,8 @@ const {
 router.post('/', createUser);
 router.post('/all', createUsers);
 
+// Get courses taken by user
+router.get('/coursesTaken/:id', getCoursesTakenByUser);
 // Get all users
 router.get('/', getUsers);
 
@@ -27,23 +29,20 @@ router.get('/:id', getUserById);
 // Delete a user
 router.delete('/:id', deleteUser);
 
-// Get courses taken by user
-router.get('/coursesTaken/:id', getCoursesTakenByUser);
 
 
 router.post('/login', loginUser);
 
 router.post('/check-email', findUserByEmail);
 
-
+router.put('/updatecourses/:id',updateCourses)
 
 //update password
 router.put('/update-password', updatePassword);
-//update courses
+//update courses using user id 
 router.put('/:id', updateCourses);
-//update user
+//update user using user id
 router.put('/update/:id', updateUser);
-
 
 
 module.exports = router;

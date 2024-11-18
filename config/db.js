@@ -13,8 +13,6 @@ const connectDB = async () => {
     });
 
     console.log(`MongoDB connected: ${conn.connection.host}`);
-
-    // Create the admin user after DB connection
     await createAdminUser();
   } catch (err) {
     console.error('Error connecting to MongoDB:', err.message);

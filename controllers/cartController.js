@@ -3,10 +3,9 @@ const Course = require('../models/course');
 
 // Get the user's cart
 const getCart = async (req, res) => {
-  const { userId } = req.params; // Extract userId from URL params
+  const { userId } = req.params;
 
   try {
-    // Find the cart for the user
     const cart = await Cart.findOne({ userId }).populate('courses.courseId');
     if (!cart) {
       return res.status(404).json({ msg: 'Cart not found' });
@@ -53,19 +52,18 @@ const addCourseToCart = async (req, res) => {
 
 
 // Remove a course from the user's cart
-// Remove a course from the user's cart
 const removeCourseFromCart = async (req, res) => {
-  const { userId } = req.params; // Extract userId from URL params
-  const { courseId } = req.body; // Extract courseId from request body
+  const { userId } = req.params; 
+  const { courseId } = req.body;
 
   try {
-    // Find the user's cart
+    
     let cart = await Cart.findOne({ userId });
     if (!cart) {
       return res.status(404).json({ msg: 'Cart not found' });
     }
 
-    // Remove the course from the cart
+   
     cart.courses = cart.courses.filter(course => course.courseId.toString() !== courseId);
     await cart.save();
 
@@ -85,12 +83,8 @@ const getCartWithCourses = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ msg: 'Cart not found' });
     }
-
-    // Get the course details using courseId from cart
     const courseIds = cart.courses.map(c => c.courseId);
     const courses = await Course.find({ course_id: { $in: courseIds } });
-
-    // Map the courses to add them to the cart
     const cartWithCourses = cart.courses.map(cartItem => {
       const course = courses.find(c => c.course_id === cartItem.courseId);
       return {
@@ -107,17 +101,14 @@ const getCartWithCourses = async (req, res) => {
 };
 
 const clearCart = async (req, res) => {
-  const { userId } = req.params; // Extract userId from URL params
+  const { userId } = req.params; 
 
   try {
-    // Find the cart for the user and remove all courses
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
       return res.status(404).json({ msg: 'Cart not found' });
     }
-
-    // Clear all courses from the cart
     cart.courses = [];
     await cart.save();
 

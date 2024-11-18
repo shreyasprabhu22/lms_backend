@@ -44,7 +44,7 @@ const createBlogs = async (req, res) => {
       const { title, content, author,authorImage, date, description, category, images } = blog;
 
       const nextBlogId = `B${nextBlogIdNumber.toString().padStart(2, "0")}`;
-      nextBlogIdNumber++; // Increment for the next blog
+      nextBlogIdNumber++;
 
       return new Blog({
         blog_id: nextBlogId,
@@ -96,14 +96,10 @@ const getBlogById = async (req, res) => {
 const updateBlog = async (req, res) => {
   try {
     const { title, content, author, authorImage, date, description, category, images } = req.body;
-
-    // Find the blog by its custom blog_id (not MongoDB _id)
     const blog = await Blog.findOne({ blog_id: req.params.id });
     if (!blog) {
       return res.status(404).json({ msg: "Blog not found" });
     }
-
-    // Update the blog fields, using existing values if not provided
     blog.title = title || blog.title;
     blog.content = content || blog.content;
     blog.author = author || blog.author;
@@ -112,11 +108,7 @@ const updateBlog = async (req, res) => {
     blog.description = description || blog.description;
     blog.category = category || blog.category;
     blog.images = images || blog.images;
-
-    // Save the updated blog object
     await blog.save();
-
-    // Return the updated blog object
     res.json(blog);
   } catch (err) {
     console.error('Error updating blog:', err.message);
@@ -126,7 +118,6 @@ const updateBlog = async (req, res) => {
 
 const deleteBlog = async (req, res) => {
   try {
-    // Find the instructor by the instructorId (string)
     const blog = await Blog.findOne({ blog_id: req.params.id });
 
     if (!blog) {
@@ -150,8 +141,6 @@ const getUpcomingBlogs = async (req, res) => {
     if (blogs.length === 0) {
       return res.status(404).json({ msg: "No blogs found" });
     }
-
-    // Convert date strings to Date objects for sorting
     const sortedBlogs = blogs.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
     
     res.json(sortedBlogs);

@@ -13,20 +13,15 @@ exports.getAllFaqs = async (req, res) => {
 // Add multiple FAQs
 exports.addMultipleFaqs = async (req, res) => {
   const faqs = req.body;
-
-  // Validate that the incoming data is an array
   if (!Array.isArray(faqs) || faqs.length === 0) {
     return res.status(400).json({ message: 'Request body should be an array of FAQs.' });
   }
-
-  // Simple validation for each FAQ
   const invalidFaqs = faqs.filter(faq => !faq.question || !faq.answer);
   if (invalidFaqs.length > 0) {
     return res.status(400).json({ message: 'Each FAQ must have both question and answer fields.' });
   }
 
   try {
-    // Add multiple FAQs to the database using insertMany
     const insertedFaqs = await Faq.insertMany(faqs);
     res.status(201).json({ message: 'FAQs added successfully', faqs: insertedFaqs });
   } catch (err) {

@@ -16,23 +16,23 @@ const cors = require('cors');
 dotenv.config();
 const app = express();
 
-// Connect to DB
+
 connectDB();
 
-// CORS Configuration
+
 const corsOptions = {
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Apply CORS middleware
+
 app.use(cors(corsOptions));
 
-// Middleware to parse JSON requests
+
 app.use(express.json());
 
-// Routes
+
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/blogs', blogRoutes);
@@ -44,7 +44,7 @@ app.use('/api/feature',featureRoutes)
 app.use('/api/pricing', pricingBoxRoutes);
 app.use('/api/carousel', carouselRoutes);
 
-// Start the server
+
 const PORT = process.env.PORT || 500;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
@@ -52,3 +52,4 @@ app.listen(PORT, () => {
 
 
 //node server.js  - running backend
+//nodemon server.js

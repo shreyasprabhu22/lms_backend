@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Define Skill Schema
 const skillSchema = new mongoose.Schema({
   iconClass: {
     type: String,
@@ -16,7 +15,7 @@ const skillSchema = new mongoose.Schema({
   },
 });
 
-// Create a Skill Model based on the schema
+
 const Skill = mongoose.model('Skill', skillSchema);
 
 module.exports = Skill;

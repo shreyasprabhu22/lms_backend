@@ -5,19 +5,17 @@ const createInstructor = async (req, res) => {
   const { name, email, bio, reviewIns, image,experience, specialization, socialLinks, location ,username,password,role} = req.body;
 
   try {
-    // Find the instructor with the highest instructorId (sort in descending order by instructorId)
+   
     const maxInstructor = await Instructor.findOne().sort({ instructorId: -1 });
-
-    // Calculate the next instructorId
-    let nextInstructorId = 'i01';  // Default id if no instructors exist
+    let nextInstructorId = 'i01';
 
     if (maxInstructor) {
       const lastInstructorId = maxInstructor.instructorId;
-      const numericId = parseInt(lastInstructorId.substring(2));  // Extract the numeric part of the last instructorId
-      nextInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;  // Increment the numeric part and pad to 2 digits
+      const numericId = parseInt(lastInstructorId.substring(2));  
+      nextInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;
     }
 
-    // Create a new instructor
+    
     const instructor = new Instructor({
       instructorId: nextInstructorId,
       name,
@@ -34,10 +32,10 @@ const createInstructor = async (req, res) => {
       role
     });
 
-    // Save the instructor to the database
+   
     await instructor.save();
 
-    // Return the newly created instructor as a response
+    
     res.status(201).json(instructor);
   } catch (err) {
     console.error(err.message);
@@ -58,29 +56,26 @@ const getInstructors = async (req, res) => {
 
 // Create multiple instructors
 const createInstructors = async (req, res) => {
-  const instructorsData = req.body;  // Array of instructors data
+  const instructorsData = req.body; 
 
   try {
-    // Validate the array format
     if (!Array.isArray(instructorsData)) {
       return res.status(400).json({ msg: 'Data must be an array of instructors' });
     }
 
-    const createdInstructors = [];  // Array to hold created instructors
+    const createdInstructors = [];  
+    const existingInstructors = await Instructor.find().sort({ instructorId: -1 }); 
 
-    // Check if there are any existing instructors
-    const existingInstructors = await Instructor.find().sort({ instructorId: -1 });  // Sort by instructorId in descending order
-
-    let newInstructorId = 'i01';  // Default to 'i01' if no instructors exist
+    let newInstructorId = 'i01';  
 
     if (existingInstructors.length > 0) {
       const lastInstructor = existingInstructors[0];
       const lastInstructorId = lastInstructor.instructorId;
-      const numericId = parseInt(lastInstructorId.substring(1));  // Extract the numeric part of the last instructorId
-      newInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;  // Increment and pad to 2 digits
+      const numericId = parseInt(lastInstructorId.substring(1));  
+      newInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;  
     }
 
-    // Iterate over the array of instructor data
+    
     for (let i = 0; i < instructorsData.length; i++) {
       const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password,role } = instructorsData[i];
 
@@ -101,21 +96,21 @@ const createInstructors = async (req, res) => {
         role
       });
 
-      // Save the new instructor to the database
+      
       await instructor.save();
 
-      // Add the created instructor to the result array
+      
       createdInstructors.push(instructor);
 
-      // Update the ID for the next instructor
+     
       const lastCreatedInstructor = createdInstructors[createdInstructors.length - 1];
       const lastCreatedId = lastCreatedInstructor.instructorId;
-      const lastCreatedNum = parseInt(lastCreatedId.substring(1));  // Get the numeric part of the last created ID
-      const nextNum = lastCreatedNum + 1;  // Increment the ID number
-      newInstructorId = `i${nextNum.toString().padStart(2, '0')}`;  // Generate next instructor ID
+      const lastCreatedNum = parseInt(lastCreatedId.substring(1)); 
+      const nextNum = lastCreatedNum + 1; 
+      newInstructorId = `i${nextNum.toString().padStart(2, '0')}`;  
     }
 
-    // Return the array of newly created instructors
+   
     res.status(201).json(createdInstructors);
   } catch (err) {
     console.error(err.message);
@@ -157,11 +152,11 @@ const updateInstructor = async (req, res) => {
   } = req.body;
 
   try {
-    // Find instructor by their custom instructorId (not MongoDB _id)
+    
     const instructor = await Instructor.findOne({ instructorId: req.params.id });
     if (!instructor) return res.status(404).json({ msg: 'Instructor not found' });
 
-    // Update instructor fields, keeping existing values if not provided
+    
     instructor.name = name || instructor.name;
     instructor.email = email || instructor.email;
     instructor.bio = bio || instructor.bio;
@@ -175,10 +170,10 @@ const updateInstructor = async (req, res) => {
     instructor.location = location || instructor.location;
     instructor.role = role || instructor.role;
 
-    // Save updated instructor object
+    
     await instructor.save();
     
-    // Return the updated instructor object
+   
     res.json(instructor);
   } catch (err) {
     console.error('Error updating instructor:', err.message);
@@ -190,14 +185,11 @@ const updateInstructor = async (req, res) => {
 // Delete an instructor profile
 const deleteInstructor = async (req, res) => {
   try {
-    // Find the instructor by the instructorId (string)
     const instructor = await Instructor.findOne({ instructorId: req.params.id });
 
     if (!instructor) {
       return res.status(404).json({ msg: 'Instructor not found' });
     }
-
-    // Remove the instructor from the database
     await Instructor.deleteOne({ instructorId: req.params.id });
     res.json({ msg: 'Instructor removed' });
   } catch (err) {
@@ -233,18 +225,13 @@ const loginInstructor = async (req, res) => {
 };
 
 const getInstructorByEmail = async (req, res) => {
-  const { email } = req.params;  // Expecting the email to be passed as a route parameter
+  const { email } = req.params;  
 
   try {
-    // Find the instructor by email
     const instructor = await Instructor.findOne({ email });
-
-    // If the instructor is not found, return 404 with exists: false
     if (!instructor) {
       return res.status(404).json({ exists: false });
     }
-
-    // Return the found instructor and exists: true
     res.json({ exists: true, instructor });
   } catch (err) {
     console.error(err.message);
@@ -258,7 +245,6 @@ const getInstructorByEmail = async (req, res) => {
 const updatePassword = async (req, res) => {
   console.log(req.body)
   try {
-    // Find the user by email
     email=req.body.email;
     new_password=req.body.newPassword
     const instructor = await Instructor.findOne({email} );

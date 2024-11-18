@@ -13,20 +13,15 @@ exports.getAllFeatures = async (req, res) => {
 // Add multiple features
 exports.addMultipleFeatures = async (req, res) => {
   const features = req.body;
-
-  // Validate that the incoming data is an array
   if (!Array.isArray(features) || features.length === 0) {
     return res.status(400).json({ message: 'Request body should be an array of features.' });
   }
-
-  // Simple validation for each feature
   const invalidFeatures = features.filter(feature => !feature.iconClass || !feature.title || !feature.description);
   if (invalidFeatures.length > 0) {
     return res.status(400).json({ message: 'Each feature must have iconClass, title, and description fields.' });
   }
 
   try {
-    // Add multiple features to the database
     const insertedFeatures = await Feature.insertMany(features);
     res.status(201).json({ message: 'Features added successfully', features: insertedFeatures });
   } catch (err) {

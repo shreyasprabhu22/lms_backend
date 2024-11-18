@@ -54,20 +54,17 @@ const defaultFaq = [
 // Create a new course
 exports.createCourse = async (req, res) => {
   try {
-    // Check if this is the first course or if we need to generate the course_id
     const courseCount = await Course.countDocuments();
     let newCourseId = '';
 
     if (courseCount === 0) {
-      newCourseId = 'C01'; // First course
+      newCourseId = 'C01'; 
     } else {
-      const lastCourse = await Course.findOne().sort({ course_id: -1 }); // Get the last created course by ID
-      const lastId = parseInt(lastCourse.course_id.slice(1)); // Extract the numeric part
+      const lastCourse = await Course.findOne().sort({ course_id: -1 }); 
+      const lastId = parseInt(lastCourse.course_id.slice(1)); 
       const nextId = lastId + 1;
-      newCourseId = `c${nextId.toString().padStart(2, '0')}`; // Generate the next ID (c01, c02, etc.)
+      newCourseId = `c${nextId.toString().padStart(2, '0')}`; 
     }
-
-    // Prepare course data
     const courseData = {
       ...req.body,
       course_id: newCourseId,
@@ -86,36 +83,20 @@ exports.createCourse = async (req, res) => {
 
 exports.addCourses = async (req, res) => {
   try {
-    // Destructure courses array from the request body
     const courses = req.body;
-
-    // Validate that the request body is an array and not empty
     if (!Array.isArray(courses) || courses.length === 0) {
       return res.status(400).json({ message: 'Please provide an array of courses.' });
     }
-
-    // Get the current count of courses to generate the next unique ID
     const courseCount = await Course.countDocuments();
-    let nextCourseId = courseCount + 1; // Start from the next ID after the existing courses count
-
-    // Loop through each course and assign a unique course_id
+    let nextCourseId = courseCount + 1;
     for (let i = 0; i < courses.length; i++) {
-      // Format course_id to include the leading zeroes
       const courseId = `C${nextCourseId.toString().padStart(2, '0')}`;
-      
-      // Set the course_id, faq, and reviews for each course
       courses[i].course_id = courseId;
       courses[i].faq = defaultFaq;
       courses[i].reviews = defaultReviews;
-
-      // Increment the course ID for the next course
       nextCourseId++;
     }
-
-    // Insert all courses into the database at once
     const createdCourses = await Course.insertMany(courses);
-
-    // Send back a success response
     res.status(201).json({
       message: 'Courses added successfully!',
       courses: createdCourses,
@@ -129,17 +110,13 @@ exports.addCourses = async (req, res) => {
 // Get courses by category
 exports.getCoursesByCategory = async (req, res) => {
   try {
-    const { category } = req.params;  // Extract the category from the URL parameter
+    const { category } = req.params;  
     console.log(category)
-    // Query the Course collection to find courses matching the given category
     const courses = await Course.find({ category: category });
-
-    // If no courses were found
     if (courses.length === 0) {
       return res.status(404).json({ message: `No courses found in the ${category} category` });
     }
     console.log(courses)
-    // Return the list of courses
     res.status(200).json(courses);
   } catch (err) {
     console.error('Error fetching courses by category:', err);
@@ -180,33 +157,25 @@ exports.getCourseById = async (req, res) => {
 };
 
 // Update a course by ID
-// Update a course by ID
 exports.updateCourse = async (req, res) => {
   try {
-    // Get course ID from the request parameters
     const courseId = req.params.id;
-
-    // Ensure the course exists by searching with the `course_id`
     const course = await Course.findOne({ course_id: courseId });
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
-
-    // Prepare the updated course data (you can modify the fields as needed)
-    const updatedCourseData = req.body; // Ensure the body is validated and only includes allowed fields.
-
-    // Update the course
+    const updatedCourseData = req.body; 
     const updatedCourse = await Course.findOneAndUpdate(
-      { course_id: courseId }, // Find by course_id
-      updatedCourseData,         // Update with the new data from the request body
-      { new: true }              // Option to return the updated document
+      { course_id: courseId }, 
+      updatedCourseData,         
+      { new: true }              
     );
 
     if (!updatedCourse) {
       return res.status(404).json({ message: 'Course not found after update' });
     }
 
-    // Return the updated course
+    
     res.status(200).json({
       message: 'Course updated successfully!',
       course: updatedCourse,
@@ -242,9 +211,7 @@ exports.deleteCourse = async (req, res) => {
 
 exports.getCoursesByInstructor = async (req, res) => {
   try {
-    const instructorId = req.params.instructor_id; // Get the instructor ID from the URL parameter
-
-    // Find all courses that belong to the instructor
+    const instructorId = req.params.instructor_id; 
     const courses = await Course.find({ instructor_id: instructorId });
 
     if (courses.length === 0) {
