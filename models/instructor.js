@@ -17,7 +17,9 @@ const instructorSchema = new mongoose.Schema({
   },
   location: String,
   username: String,
-  password: String
+  password: String,
+  isFirstLogin:{type:Boolean, default:true},
+  ownRegistered:{type:Boolean, default:false},
 });
 
 const Instructor = mongoose.model('Instructor', instructorSchema);

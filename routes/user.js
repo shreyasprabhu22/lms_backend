@@ -40,9 +40,8 @@ router.put('/updatecourses/:id',updateCourses)
 //update password
 router.put('/update-password', updatePassword);
 //update courses using user id 
-router.put('/:id', updateCourses);
-//update user using user id
-router.put('/update/:id', updateUser);
+router.put('/:id',updateUser);
+
 
 
 module.exports = router;

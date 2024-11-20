@@ -32,11 +32,10 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
-
+app.use('/api/instructors', instructorRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/blogs', blogRoutes);
-app.use('/api/instructors', instructorRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/faq', faqRoutes);

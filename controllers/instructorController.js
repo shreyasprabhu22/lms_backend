@@ -77,7 +77,8 @@ const createInstructors = async (req, res) => {
 
     
     for (let i = 0; i < instructorsData.length; i++) {
-      const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password,role } = instructorsData[i];
+      const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password,role,  isFirstLogin,
+        ownRegistered } = instructorsData[i];
 
       // Create a new instructor object
       const instructor = new Instructor({
@@ -93,7 +94,9 @@ const createInstructors = async (req, res) => {
         location,
         username,
         password,
-        role
+        role,
+        isFirstLogin,
+        ownRegistered
       });
 
       
@@ -135,7 +138,7 @@ const getInstructorById = async (req, res) => {
 
 // Update an instructor profile
 const updateInstructor = async (req, res) => {
-  console.log(req.body)
+  console.log('Request Body:', req.body); // Log the full request body for debugging
   const {
     name,
     email,
@@ -149,14 +152,18 @@ const updateInstructor = async (req, res) => {
     socialLinks,
     location,
     role,
+    password,
+    isFirstLogin,
+    ownRegistered
   } = req.body;
 
   try {
-    
     const instructor = await Instructor.findOne({ instructorId: req.params.id });
     if (!instructor) return res.status(404).json({ msg: 'Instructor not found' });
 
-    
+    console.log('Before update:', instructor);
+
+    // Update the fields
     instructor.name = name || instructor.name;
     instructor.email = email || instructor.email;
     instructor.bio = bio || instructor.bio;
@@ -169,11 +176,20 @@ const updateInstructor = async (req, res) => {
     instructor.socialLinks = socialLinks || instructor.socialLinks;
     instructor.location = location || instructor.location;
     instructor.role = role || instructor.role;
+    instructor.password = password || instructor.password;
 
-    
+    // Only update isFirstLogin if it's provided in the request body
+    if (typeof isFirstLogin !== 'undefined') {
+      instructor.isFirstLogin = isFirstLogin;
+    }
+
+    instructor.ownRegistered = ownRegistered || instructor.ownRegistered;
+
+    // Save the updated instructor
     await instructor.save();
-    
-   
+
+    console.log('After update:', instructor);  // Log after saving to see the changes
+
     res.json(instructor);
   } catch (err) {
     console.error('Error updating instructor:', err.message);

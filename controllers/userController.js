@@ -147,7 +147,7 @@ const updateCourses = async (req, res) => {
     if (!Array.isArray(coursesPurchased) || coursesPurchased.length === 0) {
       return res.status(400).json({ msg: 'Invalid courses to add' });
     }
-
+ 
   
     const updatedUser = await User.findOneAndUpdate(
       { userId: id },
