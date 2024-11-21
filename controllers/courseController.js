@@ -258,4 +258,41 @@ exports.addReview = async (req, res) => {
 };
 
 
+const User = require('../models/user'); 
+
+exports.getReviewsWithUserNames = async (req, res) => {
+  try {
+    const courseId = req.params.course_id;
+
+    const course = await Course.findOne({ course_id: courseId });
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    const reviewsWithUserNames = [];
+
+    for (const review of course.reviews) {
+      const user = await User.findOne({ userId: review.reviewer });
+
+      if (user) {
+        reviewsWithUserNames.push({
+          reviewerName: user.name,
+          rating: review.rating,
+          comment: review.comment
+        });
+      }
+    }
+
+    res.status(200).json(reviewsWithUserNames);
+  } catch (err) {
+    console.error('Error fetching reviews with user names:', err);
+    res.status(500).json({
+      message: 'Error fetching reviews with user names',
+      error: err.message
+    });
+  }
+};
+
+
 
