@@ -1,33 +1,7 @@
 const Course = require('../models/course');
-const defaultReviews = [
-  {
-    reviewer: "Alice Johnson",
-    rating: 5,
-    comment: "This course was fantastic! The content was well-structured, and the instructor explained concepts clearly. Highly recommended!"
-  },
-  {
-    reviewer: "Bob Martin",
-    rating: 4,
-    comment: "Great course overall. I learned a lot, but I wish there were more real-life examples. Still, the theory was solid."
-  },
-  {
-    reviewer: "Catherine Lee",
-    rating: 3,
-    comment: "The course was okay, but some topics were too advanced for beginners. I struggled to keep up at times."
-  },
-  {
-    reviewer: "David Chen",
-    rating: 4,
-    comment: "Good introduction to JavaScript. Some of the exercises were a bit repetitive, but I feel more confident now."
-  },
-  {
-    reviewer: "Emily Davis",
-    rating: 2,
-    comment: "Unfortunately, I didn't find the course as engaging as I had hoped. The videos were too long and the explanations could have been clearer."
-  }
-];
- 
 
+ 
+const defaultReview=[]
 const defaultFaq = [
   {
     question: "What is the duration of the course?",
@@ -69,7 +43,7 @@ exports.createCourse = async (req, res) => {
       ...req.body,
       course_id: newCourseId,
       faq:defaultFaq,
-      reviews:defaultReviews 
+      reviews:[]
     };
 
     const course = new Course(courseData);
@@ -84,6 +58,7 @@ exports.createCourse = async (req, res) => {
 exports.addCourses = async (req, res) => {
   try {
     const courses = req.body;
+    console.log(req.body)
     if (!Array.isArray(courses) || courses.length === 0) {
       return res.status(400).json({ message: 'Please provide an array of courses.' });
     }
@@ -93,7 +68,7 @@ exports.addCourses = async (req, res) => {
       const courseId = `C${nextCourseId.toString().padStart(2, '0')}`;
       courses[i].course_id = courseId;
       courses[i].faq = defaultFaq;
-      courses[i].reviews = defaultReviews;
+      courses[i].reviews =defaultReview;
       nextCourseId++;
     }
     const createdCourses = await Course.insertMany(courses);
@@ -255,6 +230,30 @@ exports.getCoursesFromDifferentCategories = async (req, res) => {
   } catch (err) {
     console.error('Error fetching courses:', err.message);
     res.status(500).send('Server Error');
+  }
+};
+
+
+exports.addReview = async (req, res) => {
+  try {
+    console.log(req.params, req.body)
+    const { reviewer, rating, comment } = req.body;
+    const course = await Course.findOne({ course_id: req.params.course_id });
+
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    console.log(course)
+    const newReview = { reviewer, rating, comment };
+    course.reviews.push(newReview);
+    console.log(course.reviews)
+    await course.save();
+
+    res.status(200).json({ message: 'Review added successfully', review: newReview });
+  } catch (err) {
+    console.error('Error adding review:', err);
+    res.status(500).json({ message: 'Error adding review', error: err.message });
   }
 };
 
