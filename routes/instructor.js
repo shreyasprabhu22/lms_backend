@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor, loginInstructor, getInstructorByEmail, updatePassword} = require('../controllers/instructorController');
+const { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor, loginInstructor, getInstructorByEmail, updatePassword, loginInstructorByEmail } = require('../controllers/instructorController');
 
 // Create a new instructor profile
 router.post('/', createInstructor);
@@ -20,6 +20,8 @@ router.put('/:id', updateInstructor);
 
 // Delete an instructor profile
 router.delete('/:id', deleteInstructor);
+
+router.post('/loginInstructorByEmail', loginInstructorByEmail)
 
 router.post('/login', loginInstructor);
 

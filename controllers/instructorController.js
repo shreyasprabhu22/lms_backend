@@ -233,6 +233,32 @@ const loginInstructor = async (req, res) => {
   }
 };
 
+const loginInstructorByEmail = async (req, res) => {
+  const { email, password } = req.body;
+  console.log(req.body)
+  try {
+    
+    const user = await Instructor.findOne({ email });
+    console.log("user",user)
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid credentials' });
+    }
+
+   
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid username or password' });
+    }
+
+    console.log(user.password==password)
+    
+    res.json({ msg: 'Login successful', user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 const getInstructorByEmail = async (req, res) => {
   const { email } = req.params;  
 
@@ -281,7 +307,8 @@ module.exports = {
   updateInstructor,
   deleteInstructor,
   loginInstructor,
-  updatePassword  
+  updatePassword ,
+  loginInstructorByEmail 
 };
 
-module.exports = { createInstructor, createInstructors, getInstructors, getInstructorById, updateInstructor, deleteInstructor,loginInstructor, getInstructorByEmail, updatePassword };
+module.exports = { createInstructor, createInstructors,loginInstructorByEmail, getInstructors, getInstructorById, updateInstructor, deleteInstructor,loginInstructor, getInstructorByEmail, updatePassword };

@@ -11,7 +11,8 @@ const {
   createUsers,
   findUserByEmail,
   updatePassword,
-  updateUser
+  updateUser,
+  loginUserByEmail
 } = require('../controllers/userController');
 
 // Create a new user
@@ -30,6 +31,7 @@ router.get('/:id', getUserById);
 router.delete('/:id', deleteUser);
 
 
+router.post('/loginUserByEmail', loginUserByEmail);
 
 router.post('/login', loginUser);
 

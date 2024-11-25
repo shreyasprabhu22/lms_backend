@@ -22,9 +22,8 @@ const instructorSchema = new mongoose.Schema({
   ownRegistered:{type:Boolean, default:false},
 });
 
-// Hash the password before saving
 instructorSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next(); // Only hash the password if it's being modified
+  if (!this.isModified('password')) return next();
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -34,7 +33,7 @@ instructorSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare password
+
 instructorSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
