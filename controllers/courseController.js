@@ -268,6 +268,7 @@ exports.getReviewsWithUserNames = async (req, res) => {
       if (user) {
         reviewsWithUserNames.push({
           reviewerName: user.name,
+          User:user.userId,
           rating: review.rating,
           comment: review.comment
         });
