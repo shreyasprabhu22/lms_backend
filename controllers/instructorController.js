@@ -1,18 +1,18 @@
 const Instructor = require('../models/instructor');
 
 const createInstructor = async (req, res) => {
-  const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password, role } = req.body;
-
+  const { name, email, bio, reviewIns, image, experience, specialization, socialLinks, location, username, password, role, isFirstLogin, ownRegistered } = req.body;
+ 
   try {
     const maxInstructor = await Instructor.findOne().sort({ instructorId: -1 });
     let nextInstructorId = 'i01';
-
+ 
     if (maxInstructor) {
       const lastInstructorId = maxInstructor.instructorId;
       const numericId = parseInt(lastInstructorId.substring(1));  
       nextInstructorId = `i${(numericId + 1).toString().padStart(2, '0')}`;
     }
-
+ 
     const instructor = new Instructor({
       instructorId: nextInstructorId,
       name,
@@ -26,11 +26,13 @@ const createInstructor = async (req, res) => {
       location,
       username,
       password,
-      role
+      role,
+      isFirstLogin,
+      ownRegistered
     });
-
+ 
     await instructor.save();
-
+ 
     res.status(201).json(instructor);
   } catch (err) {
     console.error(err.message);

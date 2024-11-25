@@ -26,13 +26,13 @@ const createUser = async (req, res) => {
   try {
     const maxUser = await User.findOne().sort({ userId: -1 });
     let nextUserId = "U01";
-
+ 
     if (maxUser) {
       const lastUserId = maxUser.userId;
       const numericId = parseInt(lastUserId.substring(1));
       nextUserId = `u${(numericId + 1).toString().padStart(2, "0")}`;
     }
-
+ 
     let user = new User({
       userId: nextUserId,
       name,
