@@ -43,7 +43,6 @@ exports.createCourse = async (req, res) => {
       ...req.body,
       course_id: newCourseId,
       faq:defaultFaq,
-      reviews:[]
     };
 
     const course = new Course(courseData);
@@ -68,14 +67,13 @@ exports.addCourses = async (req, res) => {
       const courseId = `C${nextCourseId.toString().padStart(2, '0')}`;
       courses[i].course_id = courseId;
       courses[i].faq = defaultFaq;
-      courses[i].reviews =defaultReview;
       nextCourseId++;
     }
     const createdCourses = await Course.insertMany(courses);
     res.status(201).json({
       message: 'Courses added successfully!',
       courses: createdCourses,
-    });
+    }); 
   } catch (err) {
     console.error('Error adding courses:', err);
     res.status(500).json({ message: 'Error adding courses', error: err.message });

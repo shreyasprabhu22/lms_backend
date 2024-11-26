@@ -21,7 +21,7 @@ router.put('/:id', updateInstructor);
 // Delete an instructor profile
 router.delete('/:id', deleteInstructor);
 
-router.post('/loginInstructorByEmail', loginInstructorByEmail)
+router.post('/loginByEmail', loginInstructorByEmail)
 
 router.post('/login', loginInstructor);
 

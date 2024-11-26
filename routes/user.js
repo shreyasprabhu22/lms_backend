@@ -31,7 +31,7 @@ router.get('/:id', getUserById);
 router.delete('/:id', deleteUser);
 
 
-router.post('/loginUserByEmail', loginUserByEmail);
+router.post('/loginByEmail', loginUserByEmail);
 
 router.post('/login', loginUser);
 

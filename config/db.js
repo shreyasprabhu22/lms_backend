@@ -28,9 +28,9 @@ const createAdminUser = async () => {
     if (!adminExists) {
      
       const admin = new User({
-        userId: 'U02',
+        userId: 'U01',
         name: 'Admin',
-        email: 'admin@example.com',
+        email: 'admin@example.com', 
         username: 'admin',
         password: 'admin_password', 
         profilePhoto:'assets/user.png',
